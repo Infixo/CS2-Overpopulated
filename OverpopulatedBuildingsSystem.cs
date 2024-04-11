@@ -32,14 +32,10 @@ public partial class OverpopulatedBuildingsSystem : GameSystemBase
         }
     }
 
-    private struct UpdateResidentialDemandJob : IJob
+    private struct IdentifyOverpopulatedJob : IJob
     {
         [ReadOnly]
         public NativeList<ArchetypeChunk> m_ResidentialChunks;
-
-        //[DeallocateOnJobCompletion]
-        //[ReadOnly]
-        //public NativeArray<ZonePropertiesData> m_UnlockedZones;
 
         [ReadOnly]
         public BufferTypeHandle<Renter> m_RenterType;
@@ -254,20 +250,19 @@ public partial class OverpopulatedBuildingsSystem : GameSystemBase
         __TypeHandle.__Game_Buildings_PropertyRenter_RO_ComponentTypeHandle.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Prefabs_PrefabRef_RO_ComponentTypeHandle.Update(ref base.CheckedStateRef);
         __TypeHandle.__Game_Buildings_Renter_RO_BufferTypeHandle.Update(ref base.CheckedStateRef);
-        UpdateResidentialDemandJob updateResidentialDemandJob = default(UpdateResidentialDemandJob);
-        updateResidentialDemandJob.m_ResidentialChunks = m_AllResidentialGroup.ToArchetypeChunkListAsync(base.World.UpdateAllocator.ToAllocator, out var outJobHandle);
-        updateResidentialDemandJob.m_RenterType = __TypeHandle.__Game_Buildings_Renter_RO_BufferTypeHandle;
-        updateResidentialDemandJob.m_PrefabType = __TypeHandle.__Game_Prefabs_PrefabRef_RO_ComponentTypeHandle;
-        updateResidentialDemandJob.m_PropertyRenterType = __TypeHandle.__Game_Buildings_PropertyRenter_RO_ComponentTypeHandle;
-        updateResidentialDemandJob.m_BuildingPropertyDatas = __TypeHandle.__Game_Prefabs_BuildingPropertyData_RO_ComponentLookup;
-        updateResidentialDemandJob.m_Households = __TypeHandle.__Game_Citizens_Household_RO_ComponentLookup;
-        updateResidentialDemandJob.m_Populations = __TypeHandle.__Game_City_Population_RO_ComponentLookup;
-        updateResidentialDemandJob.m_SpawnableDatas = __TypeHandle.__Game_Prefabs_SpawnableBuildingData_RO_ComponentLookup;
-        updateResidentialDemandJob.m_BuildingDatas = __TypeHandle.__Game_Prefabs_BuildingData_RO_ComponentLookup;
-        updateResidentialDemandJob.m_ZonePropertyDatas = __TypeHandle.__Game_Prefabs_ZonePropertiesData_RO_ComponentLookup;
-        updateResidentialDemandJob.m_Results = m_Results;
-        UpdateResidentialDemandJob jobData = updateResidentialDemandJob;
-        IJobExtensions.Schedule(jobData, outJobHandle).Complete();
+        IdentifyOverpopulatedJob identifyOverpopulatedJob = default(IdentifyOverpopulatedJob);
+        identifyOverpopulatedJob.m_ResidentialChunks = m_AllResidentialGroup.ToArchetypeChunkListAsync(base.World.UpdateAllocator.ToAllocator, out var outJobHandle);
+        identifyOverpopulatedJob.m_RenterType = __TypeHandle.__Game_Buildings_Renter_RO_BufferTypeHandle;
+        identifyOverpopulatedJob.m_PrefabType = __TypeHandle.__Game_Prefabs_PrefabRef_RO_ComponentTypeHandle;
+        identifyOverpopulatedJob.m_PropertyRenterType = __TypeHandle.__Game_Buildings_PropertyRenter_RO_ComponentTypeHandle;
+        identifyOverpopulatedJob.m_BuildingPropertyDatas = __TypeHandle.__Game_Prefabs_BuildingPropertyData_RO_ComponentLookup;
+        identifyOverpopulatedJob.m_Households = __TypeHandle.__Game_Citizens_Household_RO_ComponentLookup;
+        identifyOverpopulatedJob.m_Populations = __TypeHandle.__Game_City_Population_RO_ComponentLookup;
+        identifyOverpopulatedJob.m_SpawnableDatas = __TypeHandle.__Game_Prefabs_SpawnableBuildingData_RO_ComponentLookup;
+        identifyOverpopulatedJob.m_BuildingDatas = __TypeHandle.__Game_Prefabs_BuildingData_RO_ComponentLookup;
+        identifyOverpopulatedJob.m_ZonePropertyDatas = __TypeHandle.__Game_Prefabs_ZonePropertiesData_RO_ComponentLookup;
+        identifyOverpopulatedJob.m_Results = m_Results;
+        IJobExtensions.Schedule(identifyOverpopulatedJob, outJobHandle).Complete();
         base.Enabled = false;
 
         Mod.log.Info($"FULL REPORT");
@@ -287,13 +282,7 @@ public partial class OverpopulatedBuildingsSystem : GameSystemBase
         }
         Mod.log.Info($"Total: {numBuildingsReported} buildings {delta} too many households");
     }
-    /*
-    protected override void OnCreateForCompiler()
-    {
-        base.OnCreateForCompiler();
-        __TypeHandle.__AssignHandles(ref base.CheckedStateRef);
-    }
-    */
+
     public OverpopulatedBuildingsSystem()
     {
     }
