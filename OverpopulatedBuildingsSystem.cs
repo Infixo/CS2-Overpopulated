@@ -10,7 +10,6 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Game;
-using Game.Objects;
 
 namespace Overpopulated;
 
@@ -62,9 +61,6 @@ public partial class OverpopulatedBuildingsSystem : GameSystemBase
         public ComponentLookup<BuildingData> m_BuildingDatas;
 
         [ReadOnly]
-        public ComponentLookup<Game.Objects.Transform> m_TransformDatas;
-
-        [ReadOnly]
         public ComponentLookup<ZonePropertiesData> m_ZonePropertyDatas;
 
         public NativeArray<OverpopulatedData> m_Results;
@@ -77,7 +73,6 @@ public partial class OverpopulatedBuildingsSystem : GameSystemBase
                 ArchetypeChunk archetypeChunk2 = m_ResidentialChunks[l];
                 NativeArray<PrefabRef> nativeArray = archetypeChunk2.GetNativeArray(ref m_PrefabType);
                 BufferAccessor<Renter> bufferAccessor = archetypeChunk2.GetBufferAccessor(ref m_RenterType);
-                //NativeArray<Transform> nativeArrayTransforms = archetypeChunk2.GetNativeArray(ref m_TransformType);
                 // iterate through buildings
                 for (int m = 0; m < nativeArray.Length; m++)
                 {
@@ -186,7 +181,6 @@ public partial class OverpopulatedBuildingsSystem : GameSystemBase
             __Game_Prefabs_SpawnableBuildingData_RO_ComponentLookup = state.GetComponentLookup<SpawnableBuildingData>(isReadOnly: true);
             __Game_Prefabs_BuildingData_RO_ComponentLookup = state.GetComponentLookup<BuildingData>(isReadOnly: true);
             __Game_Prefabs_ZonePropertiesData_RO_ComponentLookup = state.GetComponentLookup<ZonePropertiesData>(isReadOnly: true);
-            //__Game_Objects_Transform_RO_ComponentTypeHandle = state.GetComponentTypeHandle<Game.Objects.Transform>(isReadOnly: true);
         }
     }
 

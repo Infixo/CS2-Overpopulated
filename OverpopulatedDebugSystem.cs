@@ -10,8 +10,8 @@ using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Game.Debug;
-using HarmonyLib;
 using Game.Citizens;
+using HarmonyLib;
 
 namespace Overpopulated;
 
@@ -44,34 +44,7 @@ public partial class OverpopulatedDebugSystem : BaseDebugSystem
         [ReadOnly]
         public GarbageParameterData m_GarbageParameterData;
 
-        public bool m_AccumulatedOption;
-
-        public bool m_ProduceOption;
-
         public GizmoBatcher m_GizmoBatcher;
-
-        private void DrawGarbage(Game.Objects.Transform t, int value)
-        {
-            float3 position = t.m_Position;
-            float num = (float)value / 2f;
-            position.y += num / 2f;
-            int num2 = m_GarbageParameterData.m_HappinessEffectBaseline + m_GarbageParameterData.m_HappinessEffectStep;
-            UnityEngine.Color color = UnityEngine.Color.green;
-            if (value > num2)
-            {
-                color = UnityEngine.Color.Lerp(UnityEngine.Color.green, UnityEngine.Color.red, math.saturate((float)(value - num2) * 1f / (float)m_GarbageParameterData.m_HappinessEffectStep * 9f));
-            }
-            m_GizmoBatcher.DrawWireCube(position, new float3(5f, num, 5f), color);
-        }
-
-        private void DrawConsume(Game.Objects.Transform t, float value)
-        {
-            float3 position = t.m_Position;
-            float num = value / 3f;
-            position.y += num / 2f;
-            UnityEngine.Color color = UnityEngine.Color.Lerp(UnityEngine.Color.green, UnityEngine.Color.red, math.saturate(value / 20000f));
-            m_GizmoBatcher.DrawWireCube(position, new float3(5f, num, 5f), color);
-        }
 
         private void DrawOverpopulation(Game.Objects.Transform t, int value)
         {
@@ -107,12 +80,6 @@ public partial class OverpopulatedDebugSystem : BaseDebugSystem
                     numHouseholds++;
                 }
             }
-            /*
-            if (numHouseholds > resProperties)
-            {
-                Mod.log.Info($"Prefab {prefab.Index}: {numHouseholds} vs {resProperties}");
-            }
-            */
             return math.max(0, numHouseholds - resProperties);
         }
 
@@ -177,10 +144,6 @@ public partial class OverpopulatedDebugSystem : BaseDebugSystem
 
     private GizmosSystem m_GizmosSystem;
 
-    //private Option m_AccumulatedOption;
-
-    //private Option m_ProduceOption;
-
     private TypeHandle __TypeHandle;
 
     private static bool isHooked = false;
@@ -222,8 +185,6 @@ public partial class OverpopulatedDebugSystem : BaseDebugSystem
             }
         });
         base.Enabled = false;
-        //m_AccumulatedOption = AddOption("Option 1", defaultEnabled: false);
-        //m_ProduceOption = AddOption("Option 2", defaultEnabled: false);
         Mod.log.Info("OverpopulatedDebugSystem created.");
     }
 
