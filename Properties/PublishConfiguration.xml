@@ -1,53 +1,41 @@
 ﻿<Publish>
 	<!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
-	<ModId Value="77637" />
+	<ModId Value="78554" />
 	<!--Name of the mod to display to players-->
-	<DisplayName Value="InfoLoom" />
+	<DisplayName Value="Overpopulated Gizmo" />
 	<!--Short description of the mod-->
-	<ShortDescription Value="Adds several new UI windows with extra information." />
+	<ShortDescription Value="Adds a gizmo showing buildings that have more households than their capacity." />
 	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
 	<!--LongDescription Value="Adds several new UI windows with extra information." /-->
 	<LongDescription>
-Adds several new UI windows with extra information.
+Adds a gizmo showing buildings that have more households than their capacity.
 
-Currently:
-* Demographics
-* Workforce structure
-* Workplaces distribution
-* Residential data
-* Commercial data
-* Industrial and Office data
-* Demand factors
-* Resources consumption (optional)
+The Gizmo can be enabled in the Developer Tools -> Gizmos -> Overpopulated.
 
-Please see GitHub page for **full mod description** and more **details about each window**.
+The mods also lists all buildings to a log file when the savefile is loaded.
+
+## Technical
+
+* The mod does **not** modify savefiles.
+* The mod does **not** modify any game systems.
 	</LongDescription>
 	<!--Thumbnail-->
 	<Thumbnail Value="Properties/Thumbnail.png" />
 	<!--Screenshot, can be set multiple times-->
-	<Screenshot Value="docs/demographics.png" />
-	<Screenshot Value="docs/workforce_jobs.png" />
-	<Screenshot Value="docs/demandfactors.png" />
-	<Screenshot Value="docs/residential.png" />
-	<Screenshot Value="docs/commercial.png" />
-	<Screenshot Value="docs/industrial.png" />
-	<Screenshot Value="docs/consumption.png" />
+	<Screenshot Value="docs/screenshot.png" />
 	<!--Tag, can be set multiple times-->
 	<Tag Value="Code Mod" />
 	<!--Link to the forum post where the mod can be discussed-->
-	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/infoloom.1658107/" />
+	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/overpopulated-gizmo.1664546/" />
 	<!--Version of the mod-->
-	<ModVersion Value="0.9.0" />
+	<ModVersion Value="1.0.0" />
 	<!--Recommended version of the base game to use the mod-->
 	<GameVersion Value="1.1.*" />
 	<!--Dependency for the mod, can be set multiple times-->
-	<Dependency Id="77225" />
+	<Dependency Id="" />
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
-	<ChangeLog>
-v0.9.0 (2024-04-04)
-* Mod migrated to PDXMods platform.
-	</ChangeLog>
+	<ChangeLog>* Initial build.</ChangeLog>
 	<!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon-->
-	<ExternalLink Type="github" Url="https://github.com/Infixo/CS2-InfoLoom" />
-	<ExternalLink Type="discord" Url="https://discord.com/channels/1169011184557637825/1198627819475976263" />
+	<ExternalLink Type="github" Url="https://github.com/Infixo/CS2-Overpopulated" />
+	<ExternalLink Type="discord" Url="https://discord.com/channels/1169011184557637825/1228765459772346500" />
 </Publish>
