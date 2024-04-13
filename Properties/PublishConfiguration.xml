@@ -14,6 +14,12 @@ The Gizmo can be enabled in the Developer Tools -> Gizmos -> Overpopulated.
 
 The mods also lists all buildings to a log file when the savefile is loaded.
 
+## Backgroud: homeless cims
+
+I developed this mod to deal with the **increasing number of homeless cims**. I noticed that some of my savefiles have buildings that house more families than their capacity. Those families are evicted pretty quickly after the game loads, however they do not find a new property. They are somehow stuck because, even after you save the game again and again, they are still in that very same building. The only way to get rid of that problem is to **destroy** the building and let another one grow in its place. Then those families normally find a new residential property to occupy.
+
+This issue is **very hard to notice** because the game evicts them very quickly when running. I recommend using **start game paused** option and toggling the gizmo while the game is still paused. The mod also logs such cases just after the game is loaded. You can then check in the log file if this problem exists in your city at all.
+
 ## Technical
 
 * The mod does **not** modify savefiles.
