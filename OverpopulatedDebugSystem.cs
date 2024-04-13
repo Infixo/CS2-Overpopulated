@@ -11,14 +11,12 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Game.Debug;
 using Game.Citizens;
-using HarmonyLib;
 
 namespace Overpopulated;
 
-[HarmonyPatch]
 public partial class OverpopulatedDebugSystem : BaseDebugSystem
 {
-    private struct GarbageGizmoJob : IJobChunk
+    private struct OverpopulatedGizmoJob : IJobChunk
     {
         [ReadOnly]
         public EntityTypeHandle m_EntityType;
@@ -49,7 +47,7 @@ public partial class OverpopulatedDebugSystem : BaseDebugSystem
         private void DrawOverpopulation(Game.Objects.Transform t, int value)
         {
             float3 position = t.m_Position;
-            float num = (float)value * 10f;
+            float num = (float)value * 20f;
             position.y += num / 2f;
             UnityEngine.Color color = UnityEngine.Color.red; //  UnityEngine.Color.Lerp(UnityEngine.Color.green, UnityEngine.Color.red, math.saturate(value / 20000f));
             m_GizmoBatcher.DrawWireCube(position, new float3(5f, num, 5f), color);
@@ -94,7 +92,7 @@ public partial class OverpopulatedDebugSystem : BaseDebugSystem
                 Entity entity = nativeArray[i];
                 Entity prefab = nativeArrayPrefabRef[i].m_Prefab;
                 int overpopulation = CalculateOverpopulation(entity, prefab);
-                if (overpopulation > 0) DrawOverpopulation(nativeArrayTransform[i], overpopulation);
+                if (overpopulation > 0) DrawOverpopulation(nativeArrayTransform[i], math.max(10, overpopulation));
             }
         }
 
@@ -146,22 +144,6 @@ public partial class OverpopulatedDebugSystem : BaseDebugSystem
 
     private TypeHandle __TypeHandle;
 
-    private static bool isHooked = false;
-
-    public static OverpopulatedDebugSystem m_OverpopulatedSystem;
-
-    public static Game.Debug.GarbageDebugSystem m_GarbageSystem;
-
-    /* why the fuck reverse patches are not working?!?!?
-    [HarmonyPatch(typeof(Game.Debug.BaseDebugSystem), "AddOption")]
-    [HarmonyReversePatch]
-    public static void BaseDebugSystem_AddOption(string displayName, bool defaultEnabled)
-    {
-        // its a stub so it has no initial content
-        throw new NotImplementedException("It's a stub");
-    }
-    */
-
     protected override void OnCreate()
     {
         base.OnCreate();
@@ -188,24 +170,6 @@ public partial class OverpopulatedDebugSystem : BaseDebugSystem
         Mod.log.Info("OverpopulatedDebugSystem created.");
     }
 
-    public static void LateHook()
-    {
-        m_OverpopulatedSystem = World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<OverpopulatedDebugSystem>();
-        m_GarbageSystem = World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<Game.Debug.GarbageDebugSystem>();
-        //BaseDebugSystem_AddOption("Overpopulated", true);
-        isHooked = true;
-    }
-
-    [HarmonyPatch(typeof(Game.Debug.GarbageDebugSystem), "OnUpdate")]
-    [HarmonyPrefix]
-    public static bool GarbageDebugSystem_OnUpdate()
-    {
-        if (!isHooked)
-            LateHook();
-        OverpopulatedDebugSystem.m_OverpopulatedSystem.OnUpdate();
-        return false;
-    }
-
     protected override void OnUpdate()
     {
         //Mod.log.Info($"OverpopulatedSystem.OnUpdate");
@@ -218,20 +182,17 @@ public partial class OverpopulatedDebugSystem : BaseDebugSystem
             __TypeHandle.__Game_Prefabs_BuildingPropertyData_RO_ComponentLookup.Update(ref base.CheckedStateRef);
             __TypeHandle.__Game_Buildings_Renter_RO_BufferLookup.Update(ref base.CheckedStateRef);
             __TypeHandle.__Game_Citizens_Household_RO_ComponentLookup.Update(ref base.CheckedStateRef);
-            GarbageGizmoJob garbageGizmoJob = default(GarbageGizmoJob);
-            garbageGizmoJob.m_EntityType = __TypeHandle.__Unity_Entities_Entity_TypeHandle;
-            garbageGizmoJob.m_ResidentialPropertyType = __TypeHandle.__Game_Buildings_ResidentialProperty_RO_ComponentTypeHandle;
-            garbageGizmoJob.m_PrefabType = __TypeHandle.__Game_Prefabs_PrefabRef_RO_ComponentTypeHandle;
-            garbageGizmoJob.m_TransformType = __TypeHandle.__Game_Objects_Transform_RO_ComponentTypeHandle;
-            garbageGizmoJob.m_BuildingPropertyDatas = __TypeHandle.__Game_Prefabs_BuildingPropertyData_RO_ComponentLookup;
-            garbageGizmoJob.m_Renters = __TypeHandle.__Game_Buildings_Renter_RO_BufferLookup;
-            garbageGizmoJob.m_Households = __TypeHandle.__Game_Citizens_Household_RO_ComponentLookup;
-            //garbageGizmoJob.m_AccumulatedOption = m_AccumulatedOption.enabled;
-            //garbageGizmoJob.m_ProduceOption = m_ProduceOption.enabled;
-            garbageGizmoJob.m_GizmoBatcher = m_GizmosSystem.GetGizmosBatcher(out var dependencies);
-            garbageGizmoJob.m_GarbageParameterData = GetEntityQuery(ComponentType.ReadOnly<GarbageParameterData>()).GetSingleton<GarbageParameterData>();
-            GarbageGizmoJob jobData = garbageGizmoJob;
-            base.Dependency = JobChunkExtensions.ScheduleParallel(jobData, m_BuildingGroup, JobHandle.CombineDependencies(base.Dependency, dependencies));
+            OverpopulatedGizmoJob gizmoJob = default(OverpopulatedGizmoJob);
+            gizmoJob.m_EntityType = __TypeHandle.__Unity_Entities_Entity_TypeHandle;
+            gizmoJob.m_ResidentialPropertyType = __TypeHandle.__Game_Buildings_ResidentialProperty_RO_ComponentTypeHandle;
+            gizmoJob.m_PrefabType = __TypeHandle.__Game_Prefabs_PrefabRef_RO_ComponentTypeHandle;
+            gizmoJob.m_TransformType = __TypeHandle.__Game_Objects_Transform_RO_ComponentTypeHandle;
+            gizmoJob.m_BuildingPropertyDatas = __TypeHandle.__Game_Prefabs_BuildingPropertyData_RO_ComponentLookup;
+            gizmoJob.m_Renters = __TypeHandle.__Game_Buildings_Renter_RO_BufferLookup;
+            gizmoJob.m_Households = __TypeHandle.__Game_Citizens_Household_RO_ComponentLookup;
+            gizmoJob.m_GizmoBatcher = m_GizmosSystem.GetGizmosBatcher(out var dependencies);
+            gizmoJob.m_GarbageParameterData = GetEntityQuery(ComponentType.ReadOnly<GarbageParameterData>()).GetSingleton<GarbageParameterData>();
+            base.Dependency = JobChunkExtensions.ScheduleParallel(gizmoJob, m_BuildingGroup, JobHandle.CombineDependencies(base.Dependency, dependencies));
             m_GizmosSystem.AddGizmosBatcherWriter(base.Dependency);
         }
     }

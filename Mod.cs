@@ -1,14 +1,19 @@
-﻿using System.Linq;
+﻿using System;
+using System.Reflection;
+using System.Linq;
+using System.Collections.Generic;
 using Colossal.IO.AssetDatabase;
 using Colossal.Logging;
 using Game;
 using Game.Modding;
 using Game.SceneFlow;
-using HarmonyLib;
+using Game.Debug;
 using UnityEngine.Rendering;
+using HarmonyLib;
 
 namespace Overpopulated;
 
+[HarmonyPatch]
 public class Mod : IMod
 {
     public static readonly string harmonyID = "Infixo." + nameof(Overpopulated);
@@ -25,7 +30,7 @@ public class Mod : IMod
 
         if (GameManager.instance.modManager.TryGetExecutableAsset(this, out var asset))
         {
-            log.Info($"Current mod asset at {asset.path}");
+            log.Info($"{asset.name} v{asset.version} mod asset at {asset.path}");
             modAsset = asset;
         }
 
@@ -42,8 +47,6 @@ public class Mod : IMod
         // Systems
         updateSystem.UpdateAt<OverpopulatedBuildingsSystem>(SystemUpdatePhase.GameSimulation);
         updateSystem.UpdateAt<OverpopulatedDebugSystem>(SystemUpdatePhase.DebugGizmos);
-
-        //RegisterGizmoPanel();
     }
 
     public void OnDispose()
@@ -60,30 +63,17 @@ public class Mod : IMod
     // container is added to the list
     // List<DebugUI.Widget> list = new List<DebugUI.Widget>();
     // Then list is used in AddPanel => 
-    public void RegisterGizmoPanel()
+    [HarmonyPatch(typeof(Game.Debug.DebugSystem), "RefreshGizmosDebug", new Type[] { }, new ArgumentType[] { })]
+    [HarmonyPostfix]
+    public static void DebugSystem_RegisterGizmoPanel(
+        DebugSystem __instance,
+        Dictionary<string, List<DebugUI.Widget>> ___m_Panels
+        )
     {
+        //Mod.log.Info($"DebugSystem_RegisterGizmoPanel");
+
+        // Get panel variable - apparently this is not needed to register a new gizmo, leaving for future reference
         /*
-        Game.Debug.DebugSystem.AddSystemGizmoField<LandValueDebugSystem>(container, base.World, "Land Value Debug System"); // this is private
-
-        Game.Debug.DebugSystem
-        private Dictionary<string, List<DebugUI.Widget>> m_Panels = new Dictionary<string, List<DebugUI.Widget>>();
-
-    UnityEngine.Rendering.DebugManager
-
-         DebugUI.Panel panel = DebugManager.instance.GetPanel("Gizmos", createIfNull: true, groupIndex, overrideIfExists);
-
-
-    m_Panels[name] = widgets;
-        i need to retrieve m_Panels from Game.Debug.DebugSystem
-        */
-        //Dictionary<string, List<DebugUI.Widget>> __m_Panels = AccessTools.FieldRef<Dictionary<string, List<DebugUI.Widget>>>(
-
-        // Step 1 - get m_Panels from DebugSystem
-
-        // get container ?
-        // Step 2 - create widget?
-
-        // get panel
         DebugUI.Panel panel = DebugManager.instance.GetPanel("Gizmos"); // Get existing panel, createIfNull = false
         if (panel == null)
         {
@@ -92,12 +82,49 @@ public class Mod : IMod
         else
         {
             Mod.log.Info($"Gizmos panel: {panel.displayName} flags {panel.flags} children {panel.children.Count}");
-            //foreach (ObservableList<Widget> list in panel.children)
-            //{
-            //}
+            foreach (DebugUI.Container item in panel.children)
+            {
+                Mod.log.Info($"{item.children}");
+            }
         }
+        */
 
-        // Step 
+        /* Debug
+        Mod.log.Info($"m_Panels: {___m_Panels.Count}");
+        foreach (var item in ___m_Panels)
+        {
+            Mod.log.Info($"{item.Key}: {item.Value} {item.Value.Count}");
+        }
+        */
+
+        // Retrieve container that holds all gizmos
+        List<DebugUI.Widget> widgets = ___m_Panels["Gizmos"];
+        //Mod.log.Info($"Gizmos: {widgets.Count}");
+        DebugUI.Container container = widgets.First() as DebugUI.Container;
+
+        /* Debug
+        foreach (DebugUI.Container item in widgets)
+        {
+            Mod.log.Info($"{item}");
+            //foreach (var item2 in item.children) Mod.log.Info($"{item2}");
+            container = item;
+            break;
+        }
+        */
+
+        // Register a new system as Gizmo; need to perform this call of a private method:
+        // __instance.AddSystemGizmoField<OverpopulatedDebugSystem>(container, __instance.World, "Overpopulated");
+
+        // Get the MethodInfo for the method you want to invoke
+        MethodInfo methodInfo = typeof(Game.Debug.DebugSystem).GetMethod("AddSystemGizmoField", BindingFlags.Instance | BindingFlags.NonPublic);
+        //Mod.log.Info($"{methodInfo.Name}: {methodInfo}");
+
+        // The method is generic, so make it specific
+        MethodInfo genericMethodInfo = methodInfo.MakeGenericMethod(typeof(OverpopulatedDebugSystem));
+        //Mod.log.Info($"{genericMethodInfo.Name}: {genericMethodInfo}");
+
+        // Invoke the method with arguments
+        object result = genericMethodInfo.Invoke(__instance, new object[] { container, __instance.World, "Overpopulated" });
+        //Mod.log.Info($"Invoked: {result}");
     }
-
 }
