@@ -11,13 +11,15 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine.Scripting;
+using Game;
+using Game.Citizens;
 
-namespace Game.Citizens;
+namespace Overpopulated;
 
-[CompilerGenerated]
-public class CitizenRemoveSystem : GameSystemBase
+//[CompilerGenerated]
+public partial class CitizenRemoveSystem : GameSystemBase
 {
-    [BurstCompile]
+    //[BurstCompile]
     private struct RemoveCitizenJob : IJobChunk
     {
         [ReadOnly]
@@ -27,7 +29,7 @@ public class CitizenRemoveSystem : GameSystemBase
         public ComponentTypeHandle<HouseholdMember> m_HouseholdMemberType;
 
         [ReadOnly]
-        public ComponentTypeHandle<Student> m_StudentType;
+        public ComponentTypeHandle<Game.Citizens.Student> m_StudentType;
 
         [ReadOnly]
         public ComponentTypeHandle<CurrentBuilding> m_CurrentBuildingType;
@@ -71,7 +73,7 @@ public class CitizenRemoveSystem : GameSystemBase
             NativeArray<HasJobSeeker> nativeArray2 = chunk.GetNativeArray(ref m_HasJobSeekerType);
             NativeArray<HasSchoolSeeker> nativeArray3 = chunk.GetNativeArray(ref m_HasSchoolSeekerType);
             NativeArray<HouseholdMember> nativeArray4 = chunk.GetNativeArray(ref m_HouseholdMemberType);
-            NativeArray<Student> nativeArray5 = chunk.GetNativeArray(ref m_StudentType);
+            NativeArray<Game.Citizens.Student> nativeArray5 = chunk.GetNativeArray(ref m_StudentType);
             for (int i = 0; i < nativeArray4.Length; i++)
             {
                 Entity citizen = nativeArray[i];
@@ -157,7 +159,7 @@ public class CitizenRemoveSystem : GameSystemBase
         public ComponentTypeHandle<HasSchoolSeeker> __Game_Citizens_HasSchoolSeeker_RO_ComponentTypeHandle;
 
         [ReadOnly]
-        public ComponentTypeHandle<Student> __Game_Citizens_Student_RO_ComponentTypeHandle;
+        public ComponentTypeHandle<Game.Citizens.Student> __Game_Citizens_Student_RO_ComponentTypeHandle;
 
         [ReadOnly]
         public ComponentLookup<CurrentTransport> __Game_Citizens_CurrentTransport_RO_ComponentLookup;
@@ -190,7 +192,7 @@ public class CitizenRemoveSystem : GameSystemBase
             __Game_Citizens_CurrentTransport_RO_ComponentTypeHandle = state.GetComponentTypeHandle<CurrentTransport>(isReadOnly: true);
             __Game_Agents_HasJobSeeker_RO_ComponentTypeHandle = state.GetComponentTypeHandle<HasJobSeeker>(isReadOnly: true);
             __Game_Citizens_HasSchoolSeeker_RO_ComponentTypeHandle = state.GetComponentTypeHandle<HasSchoolSeeker>(isReadOnly: true);
-            __Game_Citizens_Student_RO_ComponentTypeHandle = state.GetComponentTypeHandle<Student>(isReadOnly: true);
+            __Game_Citizens_Student_RO_ComponentTypeHandle = state.GetComponentTypeHandle<Game.Citizens.Student>(isReadOnly: true);
             __Game_Citizens_CurrentTransport_RO_ComponentLookup = state.GetComponentLookup<CurrentTransport>(isReadOnly: true);
             __Game_Citizens_HouseholdPet_RO_ComponentLookup = state.GetComponentLookup<HouseholdPet>(isReadOnly: true);
             __Game_Creatures_Creature_RO_ComponentLookup = state.GetComponentLookup<Creature>(isReadOnly: true);
@@ -209,16 +211,17 @@ public class CitizenRemoveSystem : GameSystemBase
 
     private TypeHandle __TypeHandle;
 
-    [Preserve]
+    //[Preserve]
     protected override void OnCreate()
     {
         base.OnCreate();
         m_ModificationBarrier = base.World.GetOrCreateSystemManaged<ModificationBarrier4>();
         m_CitizenQuery = GetEntityQuery(ComponentType.ReadOnly<Citizen>(), ComponentType.ReadOnly<Deleted>(), ComponentType.Exclude<Temp>());
         RequireForUpdate(m_CitizenQuery);
+        Mod.log.Info("CitizenRemoveSystem restored.");
     }
 
-    [Preserve]
+    //[Preserve]
     protected override void OnUpdate()
     {
         __TypeHandle.__Game_Common_Deleted_RO_ComponentLookup.Update(ref base.CheckedStateRef);
@@ -272,7 +275,7 @@ public class CitizenRemoveSystem : GameSystemBase
         __TypeHandle.__AssignHandles(ref base.CheckedStateRef);
     }
 
-    [Preserve]
+    //[Preserve]
     public CitizenRemoveSystem()
     {
     }

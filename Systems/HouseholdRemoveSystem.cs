@@ -9,11 +9,13 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine.Scripting;
+using Game;
+using Game.Citizens;
 
-namespace Game.Citizens;
+namespace Overpopulated;
 
-[CompilerGenerated]
-public class HouseholdRemoveSystem : GameSystemBase
+//[CompilerGenerated]
+public partial class HouseholdRemoveSystem : GameSystemBase
 {
     [BurstCompile]
     private struct RemoveHouseholdJob : IJobChunk
@@ -184,7 +186,7 @@ public class HouseholdRemoveSystem : GameSystemBase
 
     private TypeHandle __TypeHandle;
 
-    [Preserve]
+    //[Preserve]
     protected override void OnCreate()
     {
         base.OnCreate();
@@ -192,9 +194,10 @@ public class HouseholdRemoveSystem : GameSystemBase
         m_HouseholdQuery = GetEntityQuery(ComponentType.ReadOnly<Household>(), ComponentType.ReadOnly<Deleted>(), ComponentType.Exclude<Temp>());
         m_RentEventArchetype = base.EntityManager.CreateArchetype(ComponentType.ReadWrite<Event>(), ComponentType.ReadWrite<RentersUpdated>());
         RequireForUpdate(m_HouseholdQuery);
+        Mod.log.Info("HouseholdRemoveSystem restored.");
     }
 
-    [Preserve]
+    //[Preserve]
     protected override void OnUpdate()
     {
         __TypeHandle.__Game_Buildings_Renter_RW_BufferLookup.Update(ref base.CheckedStateRef);
@@ -237,7 +240,7 @@ public class HouseholdRemoveSystem : GameSystemBase
         __TypeHandle.__AssignHandles(ref base.CheckedStateRef);
     }
 
-    [Preserve]
+    //[Preserve]
     public HouseholdRemoveSystem()
     {
     }

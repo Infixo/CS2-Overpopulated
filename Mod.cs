@@ -9,6 +9,7 @@ using Game.Modding;
 using Game.SceneFlow;
 using Game.Debug;
 using UnityEngine.Rendering;
+using Unity.Entities;
 using HarmonyLib;
 
 namespace Overpopulated;
@@ -47,6 +48,12 @@ public class Mod : IMod
         // Systems
         updateSystem.UpdateAt<OverpopulatedBuildingsSystem>(SystemUpdatePhase.GameSimulation);
         updateSystem.UpdateAt<OverpopulatedDebugSystem>(SystemUpdatePhase.DebugGizmos);
+
+        // 240414 Restore old systems
+        World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<Game.Citizens.HouseholdAndCitizenRemoveSystem>().Enabled = false;
+        log.Info("HouseholdAndCitizenRemoveSystem is disabled.");
+        updateSystem.UpdateAt<Overpopulated.HouseholdRemoveSystem>(SystemUpdatePhase.Modification2);
+        updateSystem.UpdateAt<Overpopulated.CitizenRemoveSystem>(SystemUpdatePhase.Modification4);
     }
 
     public void OnDispose()
