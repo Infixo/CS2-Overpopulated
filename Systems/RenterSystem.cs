@@ -66,39 +66,53 @@ public partial class RenterSystem : GameSystemBase
                         Mod.log.Warn($"Failed to retrieve PrefabRef from {entity}.");
                         continue;
                     }
-                    int numProperties = 0;
+                    bool isHousehold = m_Households.HasComponent(entity);
+                    int maxProperties = 0;
                     if (m_BuildingPropertyDatas.TryGetComponent(prefabRef.m_Prefab, out BuildingPropertyData buildingPropertyData))
                     {
-                        numProperties = buildingPropertyData.CountProperties();
+                        if (isHousehold)
+                            maxProperties = buildingPropertyData.CountProperties(Game.Zones.AreaType.Residential);
+                        else
+                            maxProperties = buildingPropertyData.CountProperties() - buildingPropertyData.CountProperties(Game.Zones.AreaType.Residential);
                     }
                     else if (m_ParkDatas.TryGetComponent(prefabRef.m_Prefab, out ParkData parkData))
                     {
                         // If homeless are allowed, then there is no limit.
-                        numProperties = parkData.m_AllowHomeless ? int.MaxValue : 0;
+                        maxProperties = parkData.m_AllowHomeless ? int.MaxValue : 0;
                     }
                     else
                     {
-                        Mod.log.Warn($"Failed to retrieve BuildingPropertyData and ParkData from {prefabRef.m_Prefab}.");
+                        Mod.log.Warn($"Failed to retrieve BuildingPropertyData or ParkData from {prefabRef.m_Prefab}.");
                         continue;
                     }
 
+                    // Calculate current renters allocated to the property, either households or companies
+                    // Unfortunately must be done otherwise Mixed buildings get messed up - a household take place of a company
                     DynamicBuffer<Renter> renterBuffer = m_Renters[propertyRenter.m_Property];
+                    int numHouseholds = 0, numCompanies = 0;
+                    for (int k = 0; k < renterBuffer.Length; k++)
+                        if (m_Households.HasComponent(renterBuffer[k].m_Renter))
+                            numHouseholds++;
+                        else
+                            numCompanies++;
 
-                    if (renterBuffer.Length < numProperties)
+                    int numRenters = isHousehold ? numHouseholds : numCompanies;
+
+                    if (numRenters < maxProperties)
                     {
-                        m_Renters[propertyRenter.m_Property].Add(new Renter
+                        renterBuffer.Add(new Renter
                         {
                             m_Renter = entity
                         });
 #if DEBUG
-                        Mod.log.Info($"Adding {entity} to property {propertyRenter.m_Property} ({numProperties}) -> {renterBuffer.Length}");
+                        Mod.log.Info($"Adding {(isHousehold ? "household" : "company")} {entity} to {propertyRenter.m_Property} (has {numRenters}, max is {maxProperties}).");
 #endif
                     }
                     else
                     {
                         m_CommandBuffer.RemoveComponent<PropertyRenter>(entity);
                         m_CommandBuffer.AddComponent(entity, default(PropertySeeker));
-                        Mod.log.Info($"Removing {entity} from {propertyRenter.m_Property} (has {renterBuffer.Length}, max is {numProperties}).");
+                        Mod.log.Info($"Removing {(isHousehold ? "household" : "company")} {entity} from {propertyRenter.m_Property} (has {numRenters}, max is {maxProperties}).");
                     }
                 }
                 else if (!m_ServiceBuildings.HasComponent(entity))
