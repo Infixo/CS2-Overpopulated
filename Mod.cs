@@ -24,9 +24,12 @@ public class Mod : IMod
     public static ExecutableAsset modAsset { get; private set; }
     // logging
     public static ILog log = LogManager.GetLogger($"{nameof(Overpopulated)}").SetShowsErrorsInUI(false);
+    // setting
+    public static Setting setting { get; private set; }
 
     public void OnLoad(UpdateSystem updateSystem)
     {
+        instance = this;
         log.Info(nameof(OnLoad));
 
         if (GameManager.instance.modManager.TryGetExecutableAsset(this, out var asset))
@@ -34,6 +37,13 @@ public class Mod : IMod
             log.Info($"{asset.name} v{asset.version} mod asset at {asset.path}");
             modAsset = asset;
         }
+
+        setting = new Setting(this);
+        setting.RegisterInOptionsUI();
+        GameManager.instance.localizationManager.AddSource("en-US", new LocaleEN(setting));
+        setting._Hidden = false;
+
+        AssetDatabase.global.LoadSettings(nameof(Overpopulated), setting, new Setting(this));
 
         // Harmony
         var harmony = new Harmony(harmonyID);
@@ -46,19 +56,40 @@ public class Mod : IMod
         }
 
         // Systems
-        updateSystem.UpdateAt<OverpopulatedBuildingsSystem>(SystemUpdatePhase.GameSimulation);
-        updateSystem.UpdateAt<OverpopulatedDebugSystem>(SystemUpdatePhase.DebugGizmos);
+        if (setting.FeatureDumpToLog) updateSystem.UpdateAt<OverpopulatedBuildingsSystem>(SystemUpdatePhase.GameSimulation);
+        if (setting.FeatureGizmo) updateSystem.UpdateAt<OverpopulatedDebugSystem>(SystemUpdatePhase.DebugGizmos);
 
         // 240414 Restore old systems
-        World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<Game.Citizens.HouseholdAndCitizenRemoveSystem>().Enabled = false;
-        log.Info("HouseholdAndCitizenRemoveSystem is disabled.");
-        updateSystem.UpdateAt<Overpopulated.HouseholdRemoveSystem>(SystemUpdatePhase.Modification2);
-        updateSystem.UpdateAt<Overpopulated.CitizenRemoveSystem>(SystemUpdatePhase.Modification4);
+        if (setting.FeatureRenterFix)
+        {
+            World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<Game.Citizens.HouseholdAndCitizenRemoveSystem>().Enabled = false;
+            log.Info("HouseholdAndCitizenRemoveSystem is disabled.");
+            if (setting.FeatureSeparatedSystems)
+            {
+                updateSystem.UpdateAt<Overpopulated.HouseholdRemoveSystem>(SystemUpdatePhase.Modification2);
+                updateSystem.UpdateAt<Overpopulated.CitizenRemoveSystem>(SystemUpdatePhase.Modification4);
+            }
+            else
+                updateSystem.UpdateAt<Overpopulated.HouseholdAndCitizenRemoveSystem>(SystemUpdatePhase.Modification2);
+        }
+
+        // 240418 Fix for deserialization
+        if (setting.FeatureLoadingFix)
+        {
+            World.DefaultGameObjectInjectionWorld.GetOrCreateSystemManaged<Game.Serialization.RenterSystem>().Enabled = false;
+            log.Info("RenterSystem is disabled.");
+            updateSystem.UpdateAt<Overpopulated.RenterSystem>(SystemUpdatePhase.Deserialize);
+        }
     }
 
     public void OnDispose()
     {
         log.Info(nameof(OnDispose));
+        if (setting != null)
+        {
+            setting.UnregisterInOptionsUI();
+            setting = null;
+        }
         // Harmony
         var harmony = new Harmony(harmonyID);
         harmony.UnpatchAll(harmonyID);
@@ -103,6 +134,8 @@ public class Mod : IMod
             Mod.log.Info($"{item.Key}: {item.Value} {item.Value.Count}");
         }
         */
+
+        if (!setting.FeatureGizmo) return; // 240419
 
         // Retrieve container that holds all gizmos
         List<DebugUI.Widget> widgets = ___m_Panels["Gizmos"];
