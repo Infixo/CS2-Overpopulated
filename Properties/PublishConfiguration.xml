@@ -2,28 +2,40 @@
 	<!--Id must be set in order to update existed mod. it is not required for publishing mod for the first time-->
 	<ModId Value="78554" />
 	<!--Name of the mod to display to players-->
-	<DisplayName Value="Overpopulated Gizmo" />
+	<DisplayName Value="Overpopulated Gizmo and Fix" />
 	<!--Short description of the mod-->
-	<ShortDescription Value="Adds a gizmo showing buildings that have more households than their capacity." />
+	<ShortDescription Value="Patches game systems to prevent buildings becoming overpopulated when loading. Adds a gizmo showing buildings that have more households than their capacity." />
 	<!--Long description of the mod. Single line or multi line. Supports minimal markdown subset-->
 	<!--LongDescription Value="Adds several new UI windows with extra information." /-->
 	<LongDescription>
-Adds a gizmo showing buildings that have more households than their capacity.
+**The mod is deeply technical. Please read carefully what it does before enabling it.**
 
-The Gizmo can be enabled in the Developer Tools -> Gizmos -> Overpopulated.
+Patches game systems to prevent buildings becoming overpopulated when loading. Adds a gizmo showing buildings that have more households than their capacity.
 
-The mods also lists all buildings to a log file when the savefile is loaded.
+### Features
 
-## Backgroud: homeless cims
+* **Overpopulated gizmo**. Adds a gizmo showing buildings that have more households than their capacity. The Gizmo can be enabled in the Developer Tools -> Gizmos -> Overpopulated.
+* **Dum to log**. The mods also lists all buildings to a log file when the savefile is loaded.
+* **Loading fix**. When the savefile is loaded, the game does not check the building capacity when attaching households and companies to it. This leads to the overpopulation. This fix adds such a check and prevents the issue. The mod registers in the log all cases when it prevented the overpopulation.
+* **Renter fix**. The household and citizen removal process does not detach the property renter from the property and this is the root cause of the overpopulation issue. It is a rare case that is more visible in bigger cities and in cities with more deaths as they trigger more removal events. The mod patches this process. The patch can be applied in two versions - to the merged process (as it is now) or to separated processes (as it was before patch 1.0.13).
+
+### Backgroud: homeless cims
 
 I developed this mod to deal with the **increasing number of homeless cims**. I noticed that some of my savefiles have buildings that house more families than their capacity. Those families are evicted pretty quickly after the game loads, however they do not find a new property. They are somehow stuck because, even after you save the game again and again, they are still in that very same building. The only way to get rid of that problem is to **destroy** the building and let another one grow in its place. Then those families normally find a new residential property to occupy.
 
 This issue is **very hard to notice** because the game evicts them very quickly when running. I recommend using **start game paused** option and toggling the gizmo while the game is still paused. The mod also logs such cases just after the game is loaded. You can then check in the log file if this problem exists in your city at all.
 
-## Technical
+### Disclaimers
+
+1. With the two fixes that the mod does, the homeless issue **should be** solved. Please note however, that there still might be **rare** cases when singular buildings would become problematic.
+
+2. In big cities, with lots of overpopulated buildings, you will get a lot of actual homeless when you load the savefile for the first time with the mod active. It will take some time for them to either find them a property or leave the city.
+
+### Technical
 
 * The mod does **not** modify savefiles.
-* The mod does **not** modify any game systems.
+* Modified systems: RenterSystem, HouseholdAndCitizenRemoveSystem.
+* To be fully confirmed, but the mod might be incompatible with **Realistic Density** mod.
 	</LongDescription>
 	<!--Thumbnail-->
 	<Thumbnail Value="Properties/Thumbnail.png" />
@@ -34,13 +46,13 @@ This issue is **very hard to notice** because the game evicts them very quickly 
 	<!--Link to the forum post where the mod can be discussed-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/overpopulated-gizmo.1664546/" />
 	<!--Version of the mod-->
-	<ModVersion Value="1.0.0" />
+	<ModVersion Value="1.1.0" />
 	<!--Recommended version of the base game to use the mod-->
 	<GameVersion Value="1.1.*" />
 	<!--Dependency for the mod, can be set multiple times-->
 	<Dependency Id="" />
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
-	<ChangeLog>* Initial build.</ChangeLog>
+	<ChangeLog>* Patches for the savefile loading process and the household removal system.</ChangeLog>
 	<!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon-->
 	<ExternalLink Type="github" Url="https://github.com/Infixo/CS2-Overpopulated" />
 	<ExternalLink Type="discord" Url="https://discord.com/channels/1169011184557637825/1228765459772346500" />
