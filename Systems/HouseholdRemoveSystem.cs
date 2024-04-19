@@ -108,6 +108,8 @@ public partial class HouseholdRemoveSystem : GameSystemBase
                 }
                 Entity entity = nativeArray[i];
                 PropertyRenter propertyRenter = nativeArray2[i];
+                // 240419 Remove PropertyRenter from the Household entity
+                m_CommandBuffer.RemoveComponent<PropertyRenter>(entity);
                 if (!m_Renters.TryGetBuffer(propertyRenter.m_Property, out var bufferData))
                 {
                     continue;

@@ -12,13 +12,15 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine.Scripting;
+using Game;
+using Game.Citizens;
 
-namespace Game.Citizens;
+namespace Overpopulated;
 
-[CompilerGenerated]
-public class HouseholdAndCitizenRemoveSystem : GameSystemBase
+//[CompilerGenerated]
+public partial class HouseholdAndCitizenRemoveSystem : GameSystemBase
 {
-    [BurstCompile]
+    //[BurstCompile]
     private struct HouseholdAndCitizenRemoveJob : IJobChunk
     {
         [ReadOnly]
@@ -46,7 +48,7 @@ public class HouseholdAndCitizenRemoveSystem : GameSystemBase
         public ComponentLookup<Citizen> m_Citizens;
 
         [ReadOnly]
-        public ComponentLookup<Student> m_Students;
+        public ComponentLookup<Game.Citizens.Student> m_Students;
 
         [ReadOnly]
         public ComponentLookup<CurrentBuilding> m_CurrentBuildings;
@@ -211,6 +213,8 @@ public class HouseholdAndCitizenRemoveSystem : GameSystemBase
                 return;
             }
             PropertyRenter propertyRenter = m_PropertyRenters[entity];
+            // 240419 Remove PropertyRenter from the Household entity
+            m_CommandBuffer.RemoveComponent<PropertyRenter>(entity);
             if (!m_Renters.TryGetBuffer(propertyRenter.m_Property, out var bufferData))
             {
                 return;
@@ -260,7 +264,7 @@ public class HouseholdAndCitizenRemoveSystem : GameSystemBase
         public ComponentLookup<Citizen> __Game_Citizens_Citizen_RO_ComponentLookup;
 
         [ReadOnly]
-        public ComponentLookup<Student> __Game_Citizens_Student_RO_ComponentLookup;
+        public ComponentLookup<Game.Citizens.Student> __Game_Citizens_Student_RO_ComponentLookup;
 
         [ReadOnly]
         public ComponentLookup<Vehicle> __Game_Vehicles_Vehicle_RO_ComponentLookup;
@@ -306,7 +310,7 @@ public class HouseholdAndCitizenRemoveSystem : GameSystemBase
             __Game_Buildings_PropertyRenter_RO_ComponentLookup = state.GetComponentLookup<PropertyRenter>(isReadOnly: true);
             __Game_Agents_HasJobSeeker_RO_ComponentLookup = state.GetComponentLookup<HasJobSeeker>(isReadOnly: true);
             __Game_Citizens_Citizen_RO_ComponentLookup = state.GetComponentLookup<Citizen>(isReadOnly: true);
-            __Game_Citizens_Student_RO_ComponentLookup = state.GetComponentLookup<Student>(isReadOnly: true);
+            __Game_Citizens_Student_RO_ComponentLookup = state.GetComponentLookup<Game.Citizens.Student>(isReadOnly: true);
             __Game_Vehicles_Vehicle_RO_ComponentLookup = state.GetComponentLookup<Vehicle>(isReadOnly: true);
             __Game_Citizens_CurrentBuilding_RO_ComponentLookup = state.GetComponentLookup<CurrentBuilding>(isReadOnly: true);
             __Game_Citizens_CurrentTransport_RO_ComponentLookup = state.GetComponentLookup<CurrentTransport>(isReadOnly: true);
@@ -331,7 +335,7 @@ public class HouseholdAndCitizenRemoveSystem : GameSystemBase
 
     private TypeHandle __TypeHandle;
 
-    [Preserve]
+    //[Preserve]
     protected override void OnCreate()
     {
         base.OnCreate();
@@ -348,9 +352,10 @@ public class HouseholdAndCitizenRemoveSystem : GameSystemBase
         });
         m_RentEventArchetype = base.EntityManager.CreateArchetype(ComponentType.ReadWrite<Event>(), ComponentType.ReadWrite<RentersUpdated>());
         RequireForUpdate(m_DeletedQuery);
+        Mod.log.Info("Modded HouseholdAndCitizenRemoveSystem created.");
     }
 
-    [Preserve]
+    //[Preserve]
     protected override void OnUpdate()
     {
         __TypeHandle.__Game_Buildings_Renter_RW_BufferLookup.Update(ref base.CheckedStateRef);
@@ -417,7 +422,7 @@ public class HouseholdAndCitizenRemoveSystem : GameSystemBase
         __TypeHandle.__AssignHandles(ref base.CheckedStateRef);
     }
 
-    [Preserve]
+    //[Preserve]
     public HouseholdAndCitizenRemoveSystem()
     {
     }
