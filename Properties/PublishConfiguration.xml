@@ -14,7 +14,7 @@ Patches game systems to prevent buildings becoming overpopulated when loading. A
 
 ### Features
 
-* **Overpopulated gizmo**. Adds a gizmo showing buildings that have more households than their capacity. The Gizmo can be enabled in the Developer Tools -> Gizmos -> Overpopulated.
+* **Overpopulated gizmo**. Adds a gizmo showing buildings that have more households than their capacity. The Gizmo can be enabled in the Developer Tools -> Gizmos -> Overpopulated. (v1.2) The gizmo shows also free properties as green bars.
 * **Dump to log**. The mods also lists all buildings to a log file when the savefile is loaded.
 * **Loading fix**. When the savefile is loaded, the game does not check the building capacity when attaching households and companies to it. This leads to the overpopulation. This fix adds such a check and prevents the issue. The mod registers in the log all cases when it prevented the overpopulation.
 * **Renter fix**. The household and citizen removal process does not detach the property renter from the property and this is the root cause of the overpopulation issue. It is a rare case that is more visible in bigger cities and in cities with more deaths as they trigger more removal events. The mod patches this process. The patch can be applied in two versions - to the merged process (as it is now) or to separated processes (as it was before patch 1.0.13).
@@ -35,24 +35,24 @@ This issue is **very hard to notice** because the game evicts them very quickly 
 
 * The mod does **not** modify savefiles.
 * Modified systems: RenterSystem, HouseholdAndCitizenRemoveSystem.
-* To be fully confirmed, but the mod might be incompatible with **Realistic Density** mod.
 	</LongDescription>
 	<!--Thumbnail-->
 	<Thumbnail Value="Properties/Thumbnail.png" />
 	<!--Screenshot, can be set multiple times-->
 	<Screenshot Value="docs/screenshot.png" />
+	<Screenshot Value="docs/freehomes.png" />
 	<!--Tag, can be set multiple times-->
 	<Tag Value="Code Mod" />
 	<!--Link to the forum post where the mod can be discussed-->
 	<ForumLink Value="https://forum.paradoxplaza.com/forum/threads/overpopulated-gizmo.1664546/" />
 	<!--Version of the mod-->
-	<ModVersion Value="1.1.0" />
+	<ModVersion Value="1.2.0" />
 	<!--Recommended version of the base game to use the mod-->
 	<GameVersion Value="1.1.*" />
 	<!--Dependency for the mod, can be set multiple times-->
 	<Dependency Id="" />
 	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
-	<ChangeLog>* Patches for the savefile loading process and the household removal system.</ChangeLog>
+	<ChangeLog>The gizmo shows also free properties as green bars.</ChangeLog>
 	<!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon-->
 	<ExternalLink Type="github" Url="https://github.com/Infixo/CS2-Overpopulated" />
 	<ExternalLink Type="discord" Url="https://discord.com/channels/1169011184557637825/1228765459772346500" />

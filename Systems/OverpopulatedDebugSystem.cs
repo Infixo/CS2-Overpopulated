@@ -53,6 +53,15 @@ public partial class OverpopulatedDebugSystem : BaseDebugSystem
             m_GizmoBatcher.DrawWireCube(position, new float3(5f, num, 5f), color);
         }
 
+        private void DrawUnderpopulation(Game.Objects.Transform t, int value)
+        {
+            float3 position = t.m_Position;
+            float num = (float)value * 20f;
+            position.y += num / 2f;
+            UnityEngine.Color color = UnityEngine.Color.green; //  UnityEngine.Color.Lerp(UnityEngine.Color.green, UnityEngine.Color.red, math.saturate(value / 20000f));
+            m_GizmoBatcher.DrawWireCube(position, new float3(5f, num, 5f), color);
+        }
+
         public int CalculateOverpopulation(Entity entity, Entity prefab)
         {
             // Get number of residential properties
@@ -78,7 +87,7 @@ public partial class OverpopulatedDebugSystem : BaseDebugSystem
                     numHouseholds++;
                 }
             }
-            return math.max(0, numHouseholds - resProperties);
+            return numHouseholds - resProperties;
         }
 
         public void Execute(in ArchetypeChunk chunk, int unfilteredChunkIndex, bool useEnabledMask, in v128 chunkEnabledMask)
@@ -92,7 +101,8 @@ public partial class OverpopulatedDebugSystem : BaseDebugSystem
                 Entity entity = nativeArray[i];
                 Entity prefab = nativeArrayPrefabRef[i].m_Prefab;
                 int overpopulation = CalculateOverpopulation(entity, prefab);
-                if (overpopulation > 0) DrawOverpopulation(nativeArrayTransform[i], math.max(10, overpopulation));
+                if (overpopulation > 0) DrawOverpopulation(nativeArrayTransform[i], 10 + overpopulation);
+                else if (overpopulation < 0) DrawUnderpopulation(nativeArrayTransform[i], 2 - overpopulation);
             }
         }
 
